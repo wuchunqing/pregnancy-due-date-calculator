@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pregnancy Due Date Calculator — LMP, Conception, Ultrasound &amp; IVF</title>
+  <meta name="description" content="Free pregnancy due date calculator. Estimate EDD from LMP (Naegele), conception date, ultrasound or IVF transfer. See gestational age, trimester &amp; milestones — inspired by ACOG, APA &amp; What to Expect.">
+  <meta name="google-site-verification" content="uz_j2c_UOuyTXyW6W87egnN8gHCyfSqm3kyY_XEx62w" />
+  <meta name="theme-color" content="#DB2777">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#DB2777;--primary-dark:#9D174D;--primary-light:#FCE7F3;
+      --accent:#F472B6;--ink:#831843;--muted:#64748B;--line:#E2E8F0;
+      --bg:#FDF2F8;--card:#fff;--radius:16px;
+      --shadow:0 8px 32px rgba(219,39,119,.08);
+      --ok:#059669;--warn:#D97706;--t1:#EC4899;--t2:#8B5CF6;--t3:#0EA5E9;
+    }
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:#1E293B;line-height:1.65;font-size:15px}
+    .container{max-width:1080px;margin:0 auto;padding:0 20px}
+    header{background:#fff;border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;z-index:10}
+    .logo{font-size:20px;font-weight:800;color:var(--primary);text-decoration:none}
+    .hero{padding:40px 0 24px;text-align:center;background:linear-gradient(165deg,#FCE7F3,#FBCFE8 50%,#FDF2F8)}
+    .hero-badge{display:inline-block;background:var(--primary-light);color:var(--primary-dark);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:6px 14px;border-radius:999px;margin-bottom:12px}
+    .hero h1{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--ink);margin-bottom:8px}
+    .hero p{max-width:700px;margin:0 auto;color:var(--muted);font-size:15px}
+    .metrics{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+    .metric-pill{padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:700;color:var(--ink)}
+    .metric-pill span{color:var(--primary)}
+    .layout{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start;margin:28px 0}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:28px}
+    .card h2{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:4px}
+    .card .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+    .sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary-dark);margin:18px 0 10px}
+    .sec-label:first-of-type{margin-top:0}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:16px}
+    label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+    .input,.select{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;font-size:14px;font-weight:600;background:#fff}
+    .input:focus,.select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(219,39,119,.12)}
+    .hint{font-size:12px;color:var(--muted);padding:11px 12px;background:#F8FAFC;border-radius:10px;border-left:3px solid var(--accent);margin-bottom:16px}
+    .opt-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .opt-btn{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted)}
+    .opt-btn.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn-main{flex:1;min-width:140px;padding:14px 20px;background:linear-gradient(135deg,#F472B6,#DB2777);color:#fff;border:none;border-radius:11px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+    .btn-ghost{padding:14px 20px;border:1.5px solid var(--line);border-radius:11px;background:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted)}
+    .method-panels .panel{display:none}
+    .method-panels .panel.show{display:block}
+    .results{display:none;margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}
+    .results.show{display:block}
+    .plan-preview{margin-top:24px;padding-top:22px;border-top:1px dashed var(--line)}
+    .plan-preview.hide{display:none}
+    .plan-preview h3{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px}
+    .plan-preview .pv-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+    .preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .preview-cell{background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:12px;padding:14px;text-align:center}
+    .preview-cell .k{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .preview-cell .v{font-size:14px;font-weight:800;color:#94A3B8}
+    .result-hero{text-align:center;color:#fff;border-radius:18px;padding:26px;margin-bottom:16px;background:linear-gradient(145deg,#F472B6,#DB2777)}
+    .result-hero .lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.92}
+    .result-hero .val{font-size:clamp(24px,5vw,40px);font-weight:900;margin:8px 0 4px}
+    .result-hero .sub{font-size:14px;opacity:.95}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .result-cell{background:#F8FAFC;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+    .result-cell .k{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .result-cell .v{font-size:14px;font-weight:800;color:var(--primary-dark)}
+    .progress-wrap{margin:16px 0}
+    .progress-meta{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+    .progress-bar{height:14px;background:#F1F5F9;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+    .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#F472B6,#DB2777)}
+    .tri-bar{display:flex;height:28px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin:12px 0}
+    .tri-bar span{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase}
+    .tri-bar .t1{flex:13;background:var(--t1)}.tri-bar .t2{flex:14;background:var(--t2)}.tri-bar .t3{flex:13;background:var(--t3)}
+    .milestone{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line);font-size:13px}
+    .milestone:last-child{border-bottom:none}
+    .milestone .wk{min-width:64px;font-weight:800;color:var(--primary-dark)}
+    .milestone .desc{color:var(--muted)}
+    .milestone.done .wk{color:var(--ok)}
+    .milestone.next{background:var(--primary-light);margin:0 -8px;padding:12px 8px;border-radius:10px;border:none}
+    .summary-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+    .summary-table td{padding:9px 0;border-bottom:1px solid var(--line)}
+    .summary-table td:first-child{color:var(--muted);font-weight:600;width:52%}
+    .summary-table td:last-child{font-weight:700;text-align:right}
+    .tip-box,.note-box{margin-top:12px;padding:12px;border-radius:10px;font-size:12px;line-height:1.6}
+    .tip-box{background:var(--primary-light);border:1px solid #FBCFE8;color:var(--primary-dark)}
+    .note-box{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .sidebar-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+    .sidebar-card h3{font-size:14px;font-weight:800;margin-bottom:10px}
+    .ref-table{width:100%;font-size:12px;border-collapse:collapse}
+    .ref-table td{padding:6px 0;border-bottom:1px dashed var(--line)}
+    .ref-table td:last-child{text-align:right;font-weight:700}
+    .sidebar-list{list-style:none;font-size:12px;color:var(--muted);line-height:1.9}
+    .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0}
+    .guide-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+    .guide-card h2{font-size:16px;font-weight:800;margin-bottom:8px}
+    .guide-card p,.guide-card li{font-size:14px;color:var(--muted)}
+    .guide-card ul{padding-left:18px;margin-top:6px}
+    .formula-box{background:#F8FAFC;border:1px solid var(--line);border-radius:10px;padding:14px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.8;margin:12px 0;color:var(--ink)}
+    details{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+    details[open]{border-color:var(--primary)}
+    summary{padding:13px 16px;font-weight:700;cursor:pointer;list-style:none;font-size:14px}
+    summary::-webkit-details-marker{display:none}
+    details p{padding:0 16px 14px;font-size:13px;color:var(--muted);line-height:1.65}
+    footer{text-align:center;padding:24px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);background:#fff;margin-top:20px}
+    .ad-top,.ad-sidebar,.ad-bottom,.ad-mid{display:flex;justify-content:center;align-items:center;margin:16px auto;overflow:hidden;min-height:50px}
+    .ad-top{width:100%;max-width:728px;min-height:90px}
+    .ad-mid{width:100%;max-width:728px;min-height:90px;margin:8px auto 24px}
+    .ad-sidebar{width:100%;max-width:300px;min-height:250px;border-radius:var(--radius)}
+    .ad-bottom{width:100%;max-width:320px;min-height:50px}
+    .sec-title{font-size:18px;font-weight:800;margin-bottom:12px;color:var(--ink)}
+    @media(max-width:860px){
+      .layout,.form-grid,.result-grid,.guide-grid,.preview-grid{grid-template-columns:1fr}
+      .tri-bar span{font-size:8px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container"><a href="#" class="logo">Pregnancy Due Date Calculator</a></div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <span class="hero-badge">EDD · Trimesters · Milestones</span>
+    <h1>Pregnancy Due Date Calculator</h1>
+    <p>Estimate your baby’s due date from LMP (Naegele’s rule), conception date, ultrasound dating or IVF transfer. See gestational age, trimester progress &amp; key milestones — inspired by ACOG, American Pregnancy Association &amp; What to Expect.</p>
+    <div class="metrics">
+      <div class="metric-pill"><span>40 weeks</span> ≈ 280 days</div>
+      <div class="metric-pill"><span>4 methods</span> LMP · IVF · US</div>
+      <div class="metric-pill"><span>±2 weeks</span> typical range</div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="ad-top">
+    <script>atOptions={'key':'b31a21d357a574f5abfe948e08497cc3','format':'iframe','height':90,'width':728,'params':{}};</script>
+    <script src="https://www.highperformanceformat.com/b31a21d357a574f5abfe948e08497cc3/invoke.js"></script>
+    <script data-cfasync="false" src="https://adsterra-xxx1.js"></script>
+  </div>
+</div>
+
+<div class="container">
+  <div class="layout">
+    <main class="card">
+      <h2>Calculate your due date</h2>
+      <p class="sub">Choose how you want to date the pregnancy. Most people start with the first day of the last menstrual period (LMP). Your clinician may refine the EDD with an early ultrasound.</p>
+
+      <div class="sec-label">Calculation method</div>
+      <div class="opt-row" id="methodRow">
+        <button type="button" class="opt-btn active" data-method="lmp">LMP</button>
+        <button type="button" class="opt-btn" data-method="conception">Conception</button>
+        <button type="button" class="opt-btn" data-method="ultrasound">Ultrasound</button>
+        <button type="button" class="opt-btn" data-method="ivf">IVF</button>
+      </div>
+
+      <div class="method-panels">
+        <div class="panel show" id="panel-lmp">
+          <div class="form-grid">
+            <div>
+              <label for="lmpDate">First day of last period</label>
+              <input class="input" type="date" id="lmpDate">
+            </div>
+            <div>
+              <label for="cycleLen">Average cycle length (days)</label>
+              <input class="input" type="number" id="cycleLen" value="28" min="21" max="45" step="1">
+            </div>
+          </div>
+          <p class="hint">Naegele’s rule: EDD = LMP + 280 days, adjusted by (cycle length − 28). Assumes ovulation ~14 days before the next period.</p>
+        </div>
+
+        <div class="panel" id="panel-conception">
+          <div class="form-grid">
+            <div>
+              <label for="conceptionDate">Known / estimated conception date</label>
+              <input class="input" type="date" id="conceptionDate">
+            </div>
+            <div>
+              <label for="conceptionNote">Notes (optional)</label>
+              <input class="input" type="text" id="conceptionNote" placeholder="e.g. ovulation test positive">
+            </div>
+          </div>
+          <p class="hint">EDD = conception date + 266 days (38 weeks). Best when you tracked ovulation closely or know the conception day.</p>
+        </div>
+
+        <div class="panel" id="panel-ultrasound">
+          <div class="form-grid">
+            <div>
+              <label for="usDate">Ultrasound date</label>
+              <input class="input" type="date" id="usDate">
+            </div>
+            <div>
+              <label for="usWeeks">Gestational age (weeks)</label>
+              <input class="input" type="number" id="usWeeks" value="8" min="4" max="40" step="1">
+            </div>
+            <div>
+              <label for="usDays">+ Days</label>
+              <input class="input" type="number" id="usDays" value="0" min="0" max="6" step="1">
+            </div>
+            <div>
+              <label for="usType">Scan type</label>
+              <select class="select" id="usType">
+                <option value="first" selected>First trimester (most accurate)</option>
+                <option value="second">Second trimester</option>
+                <option value="other">Other / unspecified</option>
+              </select>
+            </div>
+          </div>
+          <p class="hint">EDD = scan date + (280 − gestational age in days). ACOG: first-trimester ultrasound is the most accurate dating method when available.</p>
+        </div>
+
+        <div class="panel" id="panel-ivf">
+          <div class="form-grid">
+            <div>
+              <label for="ivfDate">Embryo transfer date</label>
+              <input class="input" type="date" id="ivfDate">
+            </div>
+            <div>
+              <label for="ivfDay">Embryo age at transfer</label>
+              <select class="select" id="ivfDay">
+                <option value="3">Day 3 embryo</option>
+                <option value="5" selected>Day 5 blastocyst</option>
+                <option value="6">Day 6 blastocyst</option>
+              </select>
+            </div>
+          </div>
+          <p class="hint">EDD = transfer date + (266 − embryo day). Day 5 transfer → +261 days. IVF dating is often very precise when the transfer day is known.</p>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-main" id="btnCalc">Calculate due date</button>
+        <button type="button" class="btn-ghost" id="btnReset">Reset</button>
+      </div>
+
+      <div class="results" id="results"></div>
+
+      <div class="plan-preview" id="planPreview">
+        <h3>Your timeline preview</h3>
+        <p class="pv-sub">Enter a date — you’ll get a full breakdown like this:</p>
+        <div class="preview-grid">
+          <div class="preview-cell"><div class="k">Due date</div><div class="v">Mar 15</div></div>
+          <div class="preview-cell"><div class="k">You are</div><div class="v">12w 3d</div></div>
+          <div class="preview-cell"><div class="k">Trimester</div><div class="v">1st</div></div>
+        </div>
+        <p class="pv-sub" style="margin:0;text-align:center">Includes progress bar, key milestones &amp; trimester guide.</p>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3>Trimester overview</h3>
+        <table class="ref-table">
+          <tr><td>1st trimester</td><td>Weeks 1–13</td></tr>
+          <tr><td>2nd trimester</td><td>Weeks 14–27</td></tr>
+          <tr><td>3rd trimester</td><td>Weeks 28–40+</td></tr>
+          <tr><td>Full term</td><td>39–40 weeks</td></tr>
+          <tr><td>Early term</td><td>37–38 weeks</td></tr>
+        </table>
+      </div>
+      <div class="sidebar-card">
+        <h3>Dating tips</h3>
+        <ul class="sidebar-list">
+          <li>· LMP works best with regular cycles</li>
+          <li>· Adjust for cycle ≠ 28 days</li>
+          <li>· Early US can revise EDD</li>
+          <li>· Only ~5% deliver on EDD</li>
+          <li>· ±2 weeks is common</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h3>Common milestones</h3>
+        <ul class="sidebar-list">
+          <li>· ~8 wks: first prenatal visit</li>
+          <li>· ~12 wks: end of 1st trimester</li>
+          <li>· ~18–22: anatomy scan</li>
+          <li>· ~24–28: glucose screening</li>
+          <li>· ~36+: weekly checks often</li>
+        </ul>
+      </div>
+      <div class="sidebar-card">
+        <h3>Quick example</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px">LMP Oct 1 · 28-day cycle → due date around July 8 (Naegele).</p>
+        <button type="button" class="btn-ghost" style="width:100%" id="btnExample">Load example</button>
+      </div>
+      <div class="ad-sidebar">
+        <script>atOptions={'key':'5b2625d96c11d7b599cea160717bc0f6','format':'iframe','height':250,'width':300,'params':{}};</script>
+        <script src="https://www.highperformanceformat.com/5b2625d96c11d7b599cea160717bc0f6/invoke.js"></script>
+      </div>
+    </aside>
+  </div>
+
+  <section class="guide-grid">
+    <div class="guide-card">
+      <h2>Naegele’s rule</h2>
+      <p>The classic obstetric estimate adds 280 days (40 weeks) to the first day of your LMP — often taught as “minus 3 months + 7 days + 1 year.”</p>
+      <div class="formula-box">EDD = LMP + 280 days<br>+ (cycle − 28)</div>
+    </div>
+    <div class="guide-card">
+      <h2>Other dating methods</h2>
+      <ul>
+        <li><strong>Conception:</strong> +266 days</li>
+        <li><strong>Ultrasound:</strong> 280 − GA at scan</li>
+        <li><strong>IVF day 5:</strong> transfer +261</li>
+        <li><strong>IVF day 3:</strong> transfer +263</li>
+        <li>Early US preferred if LMP unclear</li>
+      </ul>
+    </div>
+    <div class="guide-card">
+      <h2>Accuracy notes (ACOG)</h2>
+      <ul>
+        <li>First-trimester US is most accurate</li>
+        <li>EDD may be revised for large gaps</li>
+        <li>Document the “best obstetric EDD”</li>
+        <li>Later changes should be rare</li>
+        <li>Always confirm with your provider</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="ad-mid">
+    <script data-cfasync="false" src="https://adsterra-xxx2.js"></script>
+  </div>
+
+  <h2 class="sec-title">FAQ</h2>
+  <details>
+    <summary>How is my due date calculated from LMP?</summary>
+    <p>We add 280 days to the first day of your last menstrual period, then adjust by (cycle length − 28). This is Naegele’s rule, assuming ovulation about 14 days before the next period. Irregular cycles reduce accuracy — early ultrasound may be more reliable.</p>
+  </details>
+  <details>
+    <summary>Why doesn’t my clinic’s due date match this calculator?</summary>
+    <p>Providers often combine LMP with ultrasound. ACOG recommends revising the EDD when early ultrasound differs meaningfully from LMP dating. Your charted “best obstetric estimate” is what should guide care — treat this tool as educational.</p>
+  </details>
+  <details>
+    <summary>Will I deliver on my exact due date?</summary>
+    <p>Only about 5% of babies arrive on the estimated due date. A full-term window spans roughly 37–42 weeks. ACOG notes pregnancy commonly lasts about 40 weeks ± 2 weeks. Use the EDD for planning, not as a guarantee.</p>
+  </details>
+  <details>
+    <summary>What if my cycle isn’t 28 days?</summary>
+    <p>Enter your average cycle length. Longer cycles usually mean later ovulation, so we add extra days to the EDD; shorter cycles subtract days. Very irregular cycles are better dated with ultrasound when possible.</p>
+  </details>
+  <details>
+    <summary>How does IVF dating work?</summary>
+    <p>With a known transfer date and embryo age, dating is precise: EDD = transfer + (266 − embryo day). A day-5 blastocyst uses +261 days; day-3 uses +263. Follow your fertility clinic’s documented EDD for clinical decisions.</p>
+  </details>
+  <details>
+    <summary>Is this medical advice?</summary>
+    <p>No. This calculator is for education and planning only. Prenatal care, screening schedules and delivery decisions must come from your obstetric provider. Seek urgent care for severe pain, heavy bleeding, or reduced fetal movement as advised by your clinician.</p>
+  </details>
+</div>
+
+<div class="container">
+  <div class="ad-bottom">
+    <script>atOptions={'key':'5a3667e1a909df26029e97d7d01cf2b5','format':'iframe','height':50,'width':320,'params':{}};</script>
+    <script src="https://www.highperformanceformat.com/5a3667e1a909df26029e97d7d01cf2b5/invoke.js"></script>
+    <script data-cfasync="false" src="https://adsterra-xxx3.js"></script>
+  </div>
+</div>
+
+<footer>
+  <div class="container">Pregnancy Due Date Calculator — educational estimates inspired by ACOG, APA &amp; What to Expect. Not medical advice.</div>
+</footer>
+
+<script>
+(function(){
+  var method='lmp';
+  var MILESTONES=[
+    {week:4,title:'Positive test window',desc:'Home tests often turn positive around now.'},
+    {week:8,title:'First prenatal visit',desc:'Confirm pregnancy, labs, dating discussion.'},
+    {week:12,title:'End of 1st trimester',desc:'Major organ formation largely complete.'},
+    {week:16,title:'Maternity clothes phase',desc:'Growing bump; energy often improves.'},
+    {week:20,title:'Anatomy scan window',desc:'Detailed ultrasound often ~18–22 weeks.'},
+    {week:24,title:'Viability milestone',desc:'Survival with NICU care becomes more possible.'},
+    {week:28,title:'3rd trimester begins',desc:'More frequent visits; kick counts later.'},
+    {week:32,title:'Growth checks',desc:'Baby gains weight rapidly.'},
+    {week:36,title:'Weekly visits often start',desc:'GBS test & birth plan talks common.'},
+    {week:37,title:'Early term',desc:'Baby may arrive from this week onward.'},
+    {week:39,title:'Full term',desc:'Ideal delivery window for many pregnancies.'},
+    {week:40,title:'Estimated due date',desc:'Only a guide — many births are ±2 weeks.'}
+  ];
+
+  function byId(id){return document.getElementById(id);}
+  function parseDate(v){
+    if(!v) return null;
+    var d=new Date(v+'T00:00:00');
+    return isNaN(d.getTime())?null:d;
+  }
+  function addDays(d,n){
+    var r=new Date(d.getTime());
+    r.setDate(r.getDate()+n);
+    return r;
+  }
+  function daysBetween(a,b){
+    var ms=86400000;
+    var a0=new Date(a.getFullYear(),a.getMonth(),a.getDate());
+    var b0=new Date(b.getFullYear(),b.getMonth(),b.getDate());
+    return Math.round((b0-a0)/ms);
+  }
+  function fmt(d){
+    return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  }
+  function fmtShort(d){
+    return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  }
+  function clamp(n,a,b){return Math.max(a,Math.min(b,n));}
+
+  function setDefaultDates(){
+    var today=new Date();
+    var lmp=addDays(today,-84); // ~12 weeks ago example-friendly
+    byId('lmpDate').value=lmp.toISOString().slice(0,10);
+    byId('conceptionDate').value=addDays(lmp,14).toISOString().slice(0,10);
+    byId('usDate').value=addDays(lmp,56).toISOString().slice(0,10);
+    byId('ivfDate').value=addDays(lmp,19).toISOString().slice(0,10);
+  }
+
+  function showMethod(m){
+    method=m;
+    document.querySelectorAll('#methodRow .opt-btn').forEach(function(b){
+      b.classList.toggle('active',b.getAttribute('data-method')===m);
+    });
+    document.querySelectorAll('.method-panels .panel').forEach(function(p){
+      p.classList.toggle('show',p.id==='panel-'+m);
+    });
+  }
+
+  function computeEDD(){
+    if(method==='lmp'){
+      var lmp=parseDate(byId('lmpDate').value);
+      var cycle=parseInt(byId('cycleLen').value,10)||28;
+      if(!lmp) return {error:'Enter the first day of your last period.'};
+      if(cycle<21||cycle>45) return {error:'Cycle length should be between 21 and 45 days.'};
+      var adj=cycle-28;
+      var edd=addDays(lmp,280+adj);
+      var conception=addDays(lmp,cycle-14);
+      return {edd:edd,lmp:lmp,conception:conception,methodLabel:'LMP (Naegele’ + cycle adjust)',source:'lmp'};
+    }
+    if(method==='conception'){
+      var c=parseDate(byId('conceptionDate').value);
+      if(!c) return {error:'Enter a conception date.'};
+      var edd2=addDays(c,266);
+      var lmp2=addDays(c,-14);
+      return {edd:edd2,lmp:lmp2,conception:c,methodLabel:'Conception date (+266 days)',source:'conception'};
+    }
+    if(method==='ultrasound'){
+      var us=parseDate(byId('usDate').value);
+      var w=parseInt(byId('usWeeks').value,10);
+      var d=parseInt(byId('usDays').value,10)||0;
+      if(!us) return {error:'Enter the ultrasound date.'};
+      if(isNaN(w)||w<4||w>42) return {error:'Enter a valid gestational age in weeks.'};
+      var gaDays=w*7+d;
+      var edd3=addDays(us,280-gaDays);
+      var lmp3=addDays(edd3,-280);
+      var conception3=addDays(lmp3,14);
+      return {edd:edd3,lmp:lmp3,conception:conception3,methodLabel:'Ultrasound dating',source:'ultrasound',gaAtScan:gaDays,usDate:us,usType:byId('usType').value};
+    }
+    if(method==='ivf'){
+      var t=parseDate(byId('ivfDate').value);
+      var day=parseInt(byId('ivfDay').value,10)||5;
+      if(!t) return {error:'Enter the embryo transfer date.'};
+      var edd4=addDays(t,266-day);
+      var conception4=addDays(t,-day); // fertilization approx
+      var lmp4=addDays(conception4,-14);
+      return {edd:edd4,lmp:lmp4,conception:conception4,methodLabel:'IVF transfer (day '+day+')',source:'ivf',embryoDay:day,transfer:t};
+    }
+    return {error:'Unknown method.'};
+  }
+
+  function trimester(week){
+    if(week<14) return {n:1,name:'1st trimester',color:'t1'};
+    if(week<28) return {n:2,name:'2nd trimester',color:'t2'};
+    return {n:3,name:'3rd trimester',color:'t3'};
+  }
+
+  function gestationalFromLMP(lmp,today){
+    var days=daysBetween(lmp,today);
+    return days;
+  }
+
+  function render(){
+    var data=computeEDD();
+    if(data.error){alert(data.error);return;}
+
+    var today=new Date();
+    today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    var gaDays=gestationalFromLMP(data.lmp,today);
+    var week=Math.floor(gaDays/7);
+    var day=gaDays%7;
+    if(gaDays<0){week=0;day=0;gaDays=0;}
+    var remain=daysBetween(today,data.edd);
+    var pct=clamp((gaDays/280)*100,0,100);
+    var tri=trimester(week);
+    var conceptionEst=data.conception;
+    var windowStart=addDays(data.edd,-14);
+    var windowEnd=addDays(data.edd,14);
+
+    var statusMsg;
+    if(remain>0) statusMsg=remain+' days until EDD';
+    else if(remain===0) statusMsg='Due date is today';
+    else statusMsg=Math.abs(remain)+' days past EDD';
+
+    if(week>42) statusMsg+=' · dating may need clinician review';
+
+    var html='';
+    html+='<div class="result-hero">';
+    html+='<div class="lbl">Estimated due date</div>';
+    html+='<div class="val">'+fmtShort(data.edd)+'</div>';
+    html+='<div class="sub">'+fmt(data.edd)+' · '+data.methodLabel+'</div>';
+    html+='</div>';
+
+    html+='<div class="result-grid">';
+    html+='<div class="result-cell"><div class="k">Gestational age</div><div class="v">'+week+'w '+day+'d</div></div>';
+    html+='<div class="result-cell"><div class="k">Trimester</div><div class="v">'+tri.name+'</div></div>';
+    html+='<div class="result-cell"><div class="k">Countdown</div><div class="v">'+(remain>=0?remain+' days':Math.abs(remain)+' over')+'</div></div>';
+    html+='</div>';
+
+    html+='<div class="progress-wrap"><div class="progress-meta"><span>Pregnancy progress</span><span>'+pct.toFixed(0)+'% of 40 weeks</span></div>';
+    html+='<div class="progress-bar"><div class="progress-fill" style="width:'+pct.toFixed(1)+'%"></div></div></div>';
+
+    html+='<div class="tri-bar"><span class="t1">T1 1–13</span><span class="t2">T2 14–27</span><span class="t3">T3 28–40</span></div>';
+
+    html+='<table class="summary-table">';
+    html+='<tr><td>Estimated conception</td><td>'+fmtShort(conceptionEst)+'</td></tr>';
+    html+='<tr><td>Implied LMP</td><td>'+fmtShort(data.lmp)+'</td></tr>';
+    html+='<tr><td>Likely delivery window</td><td>'+fmtShort(windowStart)+' – '+fmtShort(windowEnd)+'</td></tr>';
+    html+='<tr><td>Status</td><td>'+statusMsg+'</td></tr>';
+    html+='</table>';
+
+    html+='<div class="sec-label" style="margin-top:18px">Key milestones</div>';
+    MILESTONES.forEach(function(m){
+      var date=addDays(data.lmp,m.week*7);
+      var cls='milestone';
+      if(week>m.week) cls+=' done';
+      else if(week<=m.week && week>m.week-3) cls+=' next';
+      html+='<div class="'+cls+'"><div class="wk">Wk '+m.week+'</div><div class="desc"><strong>'+m.title+'</strong> · '+fmtShort(date)+'<br>'+m.desc+'</div></div>';
+    });
+
+    if(data.source==='ultrasound'&&data.usType==='first'){
+      html+='<div class="tip-box"><strong>ACOG note:</strong> First-trimester ultrasound dating is generally the most accurate method when available. Your provider may keep or revise the EDD based on discrepancy thresholds.</div>';
+    }else if(data.source==='lmp'){
+      html+='<div class="tip-box"><strong>Tip:</strong> If cycles are irregular or you\'re unsure of LMP, ask about an early dating ultrasound. Bring this estimate to your prenatal visit for confirmation.</div>';
+    }else if(data.source==='ivf'){
+      html+='<div class="tip-box"><strong>IVF dating:</strong> Transfer-based EDDs are usually precise. Still follow the due date documented by your fertility / obstetric team.</div>';
+    }else{
+      html+='<div class="tip-box"><strong>Tip:</strong> Conception dating works best with ovulation tracking. Confirm with your clinician if dates conflict with ultrasound.</div>';
+    }
+
+    html+='<div class="note-box"><strong>Disclaimer:</strong> Educational estimate only. Not medical advice. Prenatal care decisions should follow your obstetric provider’s best obstetric estimate of gestational age.</div>';
+
+    byId('results').innerHTML=html;
+    byId('results').classList.add('show');
+    byId('planPreview').classList.add('hide');
+  }
+
+  function reset(){
+    showMethod('lmp');
+    byId('cycleLen').value='28';
+    byId('usWeeks').value='8';
+    byId('usDays').value='0';
+    byId('ivfDay').value='5';
+    byId('conceptionNote').value='';
+    setDefaultDates();
+    byId('results').classList.remove('show');
+    byId('results').innerHTML='';
+    byId('planPreview').classList.remove('hide');
+  }
+
+  function loadExample(){
+    showMethod('lmp');
+    var today=new Date();
+    var lmp=new Date(today.getFullYear(),today.getMonth()-3,1);
+    byId('lmpDate').value=lmp.toISOString().slice(0,10);
+    byId('cycleLen').value='28';
+    render();
+  }
+
+  document.querySelectorAll('#methodRow .opt-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      showMethod(btn.getAttribute('data-method'));
+    });
+  });
+
+  byId('btnCalc').addEventListener('click',render);
+  byId('btnReset').addEventListener('click',reset);
+  byId('btnExample').addEventListener('click',loadExample);
+  setDefaultDates();
+})();
+</script>
+</body>
+</html>
